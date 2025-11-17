@@ -45,11 +45,15 @@ builder.Services.AddAuthentication(options =>
 });
 
 // CORS - Allow Angular dev server
+
+var allowedOrigins = builder.Configuration.GetSection("CorsSettings:AllowedOrigins").Get<string[]>()
+    ?? throw new InvalidOperationException("CorsSettings:AllowedOrigins not configured");
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAngularDev", policy =>
+    options.AddPolicy("AllowConfiguredOrigins", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
@@ -67,7 +71,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors("AllowAngularDev");
+app.UseCors("AllowConfiguredOrigins");
 
 app.UseAuthentication();
 app.UseAuthorization();
